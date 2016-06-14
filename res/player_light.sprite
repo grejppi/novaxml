@@ -1,0 +1,19 @@
+<sprite>
+	<frames>
+		<frame name="player-0-0.png">
+			<dimensions w="32" h="38" />
+		</frame>
+	</frames>
+	<animations>
+		<animation name="0">
+			<frame name="player-0-0" aaa="1.0"/>
+			<frame name="player-0-1" test="0.3" />
+			<frame name="player-0-2" duration="0.3" />
+			<frame name="player-0-3" duration="0.3" />
+		</animation>
+	</animations>
+	<metadata>
+		<source name="player.png" />
+		<dimensions w="124" h="150" />
+	</metadata>
+</sprite>
