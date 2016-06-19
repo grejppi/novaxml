@@ -26,15 +26,10 @@ impl Document {
         }
     }
 
-    pub fn from_file(p: &str) -> Option<Document> {
-        let string = match string_from_file(p) {
-            Some(string) => string,
-            None => return None,
-        };
-            
-        let tokens = match tokenize(&string) {
-            Some(tokens) => tokens,
-            None => return None,
+    pub fn from_string(s: &str) -> Option<Document> {
+        let tokens = match tokenize(&s) {
+            Ok(tokens) => tokens,
+            Err(_) => return None,
         };
 
         let element = match parse(tokens) {
@@ -43,6 +38,18 @@ impl Document {
         };
 
         Some(Document::from_element(element))
+    }
+
+    pub fn from_file(p: &str) -> Option<Document> {
+        let string = match string_from_file(p) {
+            Some(string) => string,
+            None => return None,
+        };
+            
+        match Document::from_string(&string) {
+            Some(document) => Some(document),
+            None => None,
+        }
     }
 
     pub fn print(&self) {

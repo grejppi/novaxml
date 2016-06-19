@@ -11,12 +11,6 @@ pub enum ParseState {
 }
 
 pub fn parse(tokens: Vec<Token>) -> Option<Element> {
-    println!("token input:");
-    for token in &tokens {
-        print!("{:?} ", token);
-    }
-    println!("");
-
     let mut state_stack = Vec::<ParseState>::new();
     let mut elements = Vec::<Element>::new();
 
@@ -166,14 +160,16 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                             &current_state),
                 }
             }
+            Token::PILeft => {
+            }
+            Token::PIRight => {
+            }
+            Token::MDLeft => {
+            }
+            Token::Comment => {
+            }
         }
     }
-    // return the current element,
-    // which should be root
-    // if current_element.get_name() != "root" {
-    //     println!("top element was not root");
-    //     return None;
-    // }
     Some(current_element)
 }
 

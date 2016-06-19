@@ -4,6 +4,7 @@
 			<dimensions w="32" h="38" />
 		</frame>
 	</frames>
+	<test2>hal lo</test2>
 	<animations>
 		<animation name="0">
 			<frame name="player-0-0" aaa="1.0"/>
