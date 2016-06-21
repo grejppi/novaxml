@@ -2,6 +2,7 @@ novaXML
 =======
 
 [![Build Status][build-status-img]](https://travis-ci.org/happeens/novaxml)
+[build-status-img]: https://img.shields.io/travis/happeens/novaxml.svg?style=flat-square
 
 novaXML is a DOM XML parser written in rust.
 
