@@ -1,4 +1,6 @@
 use std::fmt;
+use std::slice;
+use std::iter::Cloned;
 
 #[derive(Clone)]
 pub struct Element {
@@ -95,6 +97,29 @@ impl Element {
         }
         println!("{}</{}>", s, self.name);
     }
+
+    // methods for accessing element content
+    pub fn get_child(&self, name: &str) -> Option<&Element> {
+        self.children.iter().by_ref().find(|ref x| x.get_name() == name)
+    }
+
+    pub fn get_first_child(&self) -> Option<&Element> {
+        self.children.first()
+    }
+
+    pub fn iter_children(&self) -> Cloned<slice::Iter<Element>> {
+        // TODO: find a better way to do this
+        self.children.iter().cloned()
+    }
+
+    pub fn get_attribute(&self, name: &str) -> Option<&Attribute> {
+        self.attributes.iter().by_ref().find(|ref x| x.get_name() == name)
+    }
+
+    pub fn iter_attributes(&self) -> Cloned<slice::Iter<Attribute>> {
+        // TODO: find a better way to do this
+        self.attributes.iter().cloned()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -110,6 +135,10 @@ impl Attribute {
             name: n.to_string(),
             value: v.to_string(),
         }
+    }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
     }
 
     pub fn print(&self) -> String {

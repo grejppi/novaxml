@@ -246,10 +246,6 @@ pub fn tokenize(s: &str) -> Result<Vec<Token>, String> {
             }
         }
     }
-    for token in &tokens {
-        println!("{:?} ", token);
-    }
-
     Ok(tokens)
 }
 

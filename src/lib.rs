@@ -4,7 +4,6 @@ pub mod tokenizer;
 
 mod tests;
 
-use std::option::Option;
 use tokenizer::*;
 use parser::*;
 use nodes::*;
@@ -26,29 +25,36 @@ impl Document {
         }
     }
 
-    pub fn from_string(s: &str) -> Option<Document> {
+    pub fn from_string(s: &str) -> Result<Document, String> {
         let tokens = match tokenize(&s) {
             Ok(tokens) => tokens,
-            Err(_) => return None,
+            Err(e) => return Err(e),
         };
 
         let element = match parse(tokens) {
-            Some(element) => element,
-            None => return None,
+            Ok(element) => element,
+            Err(e) => return Err(e),
         };
 
-        Some(Document::from_element(element))
+        Ok(Document::from_element(element))
     }
 
-    pub fn from_file(p: &str) -> Option<Document> {
+    pub fn from_file(p: &str) -> Result<Document, String> {
         let string = match string_from_file(p) {
             Some(string) => string,
-            None => return None,
+            None => return Err("Couldn't make String from file".into()),
         };
             
         match Document::from_string(&string) {
-            Some(document) => Some(document),
-            None => None,
+            Ok(document) => Ok(document),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub fn get_root(&self) -> &Element {
+        match self.root.get_first_child() {
+            Some(c) => c,
+            None => panic!("Document has no root element!"),
         }
     }
 

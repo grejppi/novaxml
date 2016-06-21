@@ -1,6 +1,5 @@
 use super::tokenizer::Token;
 use super::nodes::*;
-use std::option::Option;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum ParseState {
@@ -8,9 +7,11 @@ pub enum ParseState {
     InElement,
     InStartTag,
     InEndTag,
+    InPI,
+    InMD,
 }
 
-pub fn parse(tokens: Vec<Token>) -> Option<Element> {
+pub fn parse(tokens: Vec<Token>) -> Result<Element, String> {
     let mut state_stack = Vec::<ParseState>::new();
     let mut elements = Vec::<Element>::new();
 
@@ -77,7 +78,7 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
 
                         let mut parent = match elements.pop() {
                             Some(parent) => parent,
-                            None => return Some(current_element),
+                            None => return Ok(current_element),
                         };
                         // otherwise, append current element as parent
                         // and make parent the new current
@@ -89,7 +90,14 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                             Some(state) => state,
                             // since InDocument state should always
                             // be there, there's an error
-                            None => return None,
+                            None => return Err("Unexpected closing tag: >".into()),
+                        }
+                    }
+                    ParseState::InMD => {
+                        // MD end found
+                        current_state = match state_stack.pop() {
+                            Some(state) => state,
+                            None => return Err("Unexpected closing tag: >".into()),
                         }
                     }
                     _ => return token_not_allowed(
@@ -107,7 +115,8 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                         // check if there's a parent
                         let mut parent = match elements.pop() {
                             Some(parent) => parent,
-                            None => return Some(current_element),
+                            // If not, we're returning the root element
+                            None => return Ok(current_element),
                         };
                         // otherwise, append current element as parent
                         // and make parent the new current
@@ -119,7 +128,7 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                             Some(state) => state,
                             // since InDocument state should always
                             // be there, there's an error
-                            None => return None,
+                            None => return Err("Unexpected closing tag: />".into()),
                         }
                     }
                     _ => return token_not_allowed(
@@ -135,6 +144,10 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                         current_element.append_attribute(
                             (Attribute::new(&n, &v)));
                     }
+                    ParseState::InMD | ParseState::InPI => {
+                        // Ignore MD and PI for now
+                        continue;
+                    }
                     _ => return token_not_allowed(
                             &token, 
                             &current_state),
@@ -148,12 +161,21 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                     }
                     ParseState::InEndTag => {
                         // tag name found
-                        // TODO: check if tag names match
+                        // check if tags match
+                        if current_element.get_name() != s {
+                            return Err(format!("Expected closing tag: {}, found closing tag: {}",
+                                               current_element.get_name(),
+                                               s));
+                        }
                     }
                     ParseState::InElement => {
                         // found text data attribute
                         // inside element
                         current_element.set_text(s);
+                    }
+                    ParseState::InMD | ParseState::InPI => {
+                        // Ignore MD and PI for now
+                        continue;
                     }
                     _ => return token_not_allowed(
                             &token, 
@@ -161,20 +183,39 @@ pub fn parse(tokens: Vec<Token>) -> Option<Element> {
                 }
             }
             Token::PILeft => {
+                state_stack.push(current_state.clone());
+                current_state = ParseState::InPI;
             }
             Token::PIRight => {
+                match current_state {
+                    ParseState::InPI => {
+                        // state is now the top state from the stack
+                        current_state = match state_stack.pop() {
+                            Some(state) => state,
+                            // since InDocument state should always
+                            // be there, there's an error
+                            None => return Err("Unexpected closing tag: ?>".into()),
+                        }
+                    }
+                    _ => return token_not_allowed(
+                            &token, 
+                            &current_state),
+                }
             }
             Token::MDLeft => {
+                // found markup declaration, ignore it for now
+                state_stack.push(current_state.clone());
+                current_state = ParseState::InMD;
             }
             Token::Comment => {
+                // Ignore comments
             }
         }
     }
-    Some(current_element)
+    Ok(current_element)
 }
 
 pub fn token_not_allowed(t: &Token,
-                         p: &ParseState) -> Option<Element> {
-    println!("Token not allowed: {:?}, state: {:?}", t, p);
-    None
+                         p: &ParseState) -> Result<Element, String> {
+    Err(format!("Token not allowed: {:?}, state: {:?}", t, p))
 }
