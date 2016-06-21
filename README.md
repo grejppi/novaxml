@@ -1,7 +1,10 @@
 novaXML
 =======
 
+[![Build Status][build-status-img]](https://travis-ci.org/happeens/novaxml)
+
 novaXML is a DOM XML parser written in rust.
+
 Note: This project is in its infancy and has a very limited amount of features as of now. Also, the documentation is still in progress.
 
 Right now, the parser can only read XML Documents or Strings, but support for constructing DOM trees in memory and writing them to file is planned.

@@ -58,5 +58,4 @@ fn get_child() {
     };
 
     println!("child found: {}", child.get_name());
-    assert!(false);
 }
