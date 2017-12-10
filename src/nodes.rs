@@ -41,7 +41,7 @@ impl Element {
     pub fn append_child(&mut self, e: Element) {
         self.children.push(e);
     }
-    
+
     pub fn append_attribute(&mut self, a: Attribute) {
         self.attributes.push(a);
     }
@@ -53,7 +53,7 @@ impl Element {
     pub fn get_name(&self) -> &str {
         &self.name
     }
-    
+
     pub fn set_name(&mut self, s: &str) {
         self.name = s.to_string();
     }
@@ -139,6 +139,10 @@ impl Attribute {
 
     pub fn get_name(&self) -> &str {
         &self.name
+    }
+
+    pub fn get_value(&self) -> &str {
+        &self.value
     }
 
     pub fn print(&self) -> String {
